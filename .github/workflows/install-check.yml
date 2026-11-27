@@ -1,0 +1,44 @@
+# Installs secure on real Macs after every formula update, the way a user does.
+# Why: v0.1.2 passed every check on Linux but was killed on Apple Silicon (exit 137), because its
+# signature was invalid. Nothing ran the formula on a Mac. This repo is public, so macOS runners are free.
+name: install-check
+on:
+  push:
+    branches: [master]
+    paths: ["Formula/secure.rb"]
+  pull_request:
+    paths: ["Formula/secure.rb", ".github/workflows/install-check.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  brew:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: brew install
+        run: brew install securedotcom/tap/secure
+      - name: formula test (secure --help)
+        run: brew test securedotcom/tap/secure
+      - name: signature valid (Apple codesign)
+        run: codesign --verify -v "$(realpath "$(brew --prefix)/bin/secure")"
+      - name: secure version reaches the free API
+        run: secure version
+
+  pip:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: pip install the same version, retry while PyPI catches up
+        run: |
+          v=$(sed -n 's/^  version "\(.*\)"/\1/p' Formula/secure.rb)
+          python -m venv /tmp/sv
+          for i in 1 2 3 4 5 6 7 8 9 10; do /tmp/sv/bin/pip install -q --no-cache-dir "secure-cli==$v" && break; sleep 30; done
+          /tmp/sv/bin/secure --help
+          codesign --verify -v "$HOME/.cache/secure-cli/$v/secure"
