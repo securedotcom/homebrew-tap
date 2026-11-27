@@ -2,28 +2,28 @@
 class Secure < Formula
   desc "Secure.com command line: CVE, software and weakness answers from public data, no account"
   homepage "https://secure.com"
-  version "0.1.1"
+  version "0.1.2"
   license :cannot_represent
 
   on_macos do
     on_arm do
-      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.1/secure-darwin-arm64.tar.gz"
-      sha256 "bf0f8d476bc7c16e141fcacc6f298730174b53b900f006f82e10b73af3fa89a3"
+      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.2/secure-darwin-arm64.tar.gz"
+      sha256 "c73ad107519a48e5c812187c29ee55fa858a0adca64b388ac8b07a063bc4ab77"
     end
     on_intel do
-      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.1/secure-darwin-x64.tar.gz"
-      sha256 "58e51b259fd3a186e1779ac37eb6b2284d49cefd80568bf495a58a9bc07135da"
+      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.2/secure-darwin-x64.tar.gz"
+      sha256 "47126401e772947b3d358a9059ed4eae57e11b249948642ca313aa31b37c31db"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.1/secure-linux-arm64.tar.gz"
-      sha256 "3673e60f4cb9b3484641af50b98ad9318c38010cab97a66d5871fb7f4fc4a3b0"
+      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.2/secure-linux-arm64.tar.gz"
+      sha256 "9ac638579c275d4e23595651bd37c570a06177cc5b48807bc29b6c61d6fd85a8"
     end
     on_intel do
-      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.1/secure-linux-x64.tar.gz"
-      sha256 "0267bff130da7b2f4806b4e405a147affa68ca0cf7db35d3b77bb6640f4181bd"
+      url "https://github.com/securedotcom/homebrew-tap/releases/download/v0.1.2/secure-linux-x64.tar.gz"
+      sha256 "63ebcabc8d9edf0f4506e3683698eef1002552031930cbff100677ff870125ff"
     end
   end
 
