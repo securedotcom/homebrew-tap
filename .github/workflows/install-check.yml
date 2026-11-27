@@ -9,6 +9,10 @@ on:
   pull_request:
     paths: ["Formula/secure.rb", ".github/workflows/install-check.yml"]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to check (default: the formula's)"
+        required: false
 permissions:
   contents: read
 jobs:
@@ -42,3 +46,34 @@ jobs:
           for i in 1 2 3 4 5 6 7 8 9 10; do /tmp/sv/bin/pip install -q --no-cache-dir "secure-cli==$v" && break; sleep 30; done
           /tmp/sv/bin/secure --help
           codesign --verify -v "$HOME/.cache/secure-cli/$v/secure"
+
+  # The pip launcher once unpacked in the system temp folder and moved the file into ~/.cache.
+  # On Ubuntu /tmp is often tmpfs, so the move failed with EXDEV (tester report, 0.1.5).
+  # This job puts TMPDIR on its own tmpfs, a different filesystem from ~/.cache.
+  pip-linux-tmpfs:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: temp folder on its own tmpfs
+        run: |
+          sudo mkdir -p /mnt/tmpfs && sudo mount -t tmpfs -o size=512m tmpfs /mnt/tmpfs && sudo chmod 1777 /mnt/tmpfs
+          echo "TMPDIR=/mnt/tmpfs" >> "$GITHUB_ENV"
+          df -h /mnt/tmpfs "$HOME"
+      - name: pip install, first run downloads across filesystems
+        env:
+          WANT: ${{ inputs.version }}
+        run: |
+          v=${WANT:-$(sed -n 's/^  version "\(.*\)"/\1/p' Formula/secure.rb)}
+          echo "checking $v"
+          python -m venv "$HOME/sv"
+          for i in 1 2 3 4 5 6 7 8 9 10; do "$HOME/sv/bin/pip" install -q --no-cache-dir "secure-cli==$v" && break; sleep 30; done
+          "$HOME/sv/bin/secure" --help
+          "$HOME/sv/bin/secure" version
+          test -x "$HOME/.cache/secure-cli/$v/secure"
